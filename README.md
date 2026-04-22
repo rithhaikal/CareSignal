@@ -9,7 +9,7 @@ It combines simple rule-based logic with AI-generated guidance to provide clear,
 ## 📸 Screenshots
 
 ### Landing Page
-<img src="./docs/landing.png" width="700" />
+<img src="./docs/landing.PNG" width="700" />
 
 ### Symptom Selection
 <img src="./docs/symptoms.png" width="700" />
