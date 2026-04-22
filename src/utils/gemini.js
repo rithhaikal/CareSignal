@@ -2,35 +2,69 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-const FALLBACK_GUIDANCE = {
-  explanation:
-    "Based on the symptoms selected and the current risk level, you should continue monitoring closely and follow the guidance below.",
-  next24h: {
-    morning: [
-      "Drink water regularly and avoid strenuous activity",
-      "Recheck how you feel after a few hours",
+function getFallbackGuidance(language = "en") {
+  if (language === "bm") {
+    return {
+      explanation:
+        "Berdasarkan simptom yang dipilih dan tahap risiko semasa, anda disarankan untuk terus memantau keadaan dan mengikuti panduan di bawah.",
+      next24h: {
+        morning: [
+          "Minum air secukupnya dan elakkan aktiviti berat",
+          "Periksa semula keadaan anda selepas beberapa jam",
+        ],
+        afternoon: [
+          "Ambil makanan ringan jika selera makan normal",
+          "Pantau jika ada simptom yang semakin teruk",
+        ],
+        night: [
+          "Berehat lebih awal dan nilai semula simptom sebelum tidur",
+          "Dapatkan rawatan jika simptom menjadi semakin teruk",
+        ],
+      },
+      warningSigns: [
+        "Sesak nafas",
+        "Sakit dada yang teruk",
+        "Kekeliruan atau kelemahan yang semakin teruk",
+        "Tidak dapat minum atau makan dengan baik",
+      ],
+      ifYouWait: [
+        "Jika simptom kekal sama selama 24 jam, penilaian semula mungkin diperlukan.",
+        "Jika simptom menjadi lebih teruk, dapatkan rawatan perubatan dengan lebih segera.",
+        "Jika tanda amaran serius muncul secara tiba-tiba, jangan terus pantau di rumah.",
+      ],
+    };
+  }
+
+  return {
+    explanation:
+      "Based on the symptoms selected and the current risk level, you should continue monitoring closely and follow the guidance below.",
+    next24h: {
+      morning: [
+        "Drink water regularly and avoid strenuous activity",
+        "Recheck how you feel after a few hours",
+      ],
+      afternoon: [
+        "Eat light meals if your appetite is normal",
+        "Monitor for any worsening symptoms",
+      ],
+      night: [
+        "Rest early and reassess your symptoms before sleep",
+        "Seek care if symptoms become significantly worse",
+      ],
+    },
+    warningSigns: [
+      "Difficulty breathing",
+      "Severe chest pain",
+      "Worsening confusion or weakness",
+      "Unable to keep fluids down",
     ],
-    afternoon: [
-      "Eat light meals if your appetite is normal",
-      "Monitor for any worsening symptoms",
+    ifYouWait: [
+      "If symptoms stay the same for 24 hours, reassessment may be needed.",
+      "If symptoms worsen, seek medical attention sooner.",
+      "If severe warning signs appear suddenly, do not continue monitoring at home.",
     ],
-    night: [
-      "Rest early and reassess your symptoms before sleep",
-      "Seek care if symptoms become significantly worse",
-    ],
-  },
-  warningSigns: [
-    "Difficulty breathing",
-    "Severe chest pain",
-    "Worsening confusion or weakness",
-    "Unable to keep fluids down",
-  ],
-  ifYouWait: [
-    "If symptoms stay the same for 24 hours, reassessment may be needed.",
-    "If symptoms worsen, seek medical attention sooner.",
-    "If severe warning signs appear suddenly, do not continue monitoring at home.",
-  ],
-};
+  };
+}
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -66,11 +100,17 @@ export async function generateGuidance({
   risk,
   action,
   otherSymptom,
+  language = "en",
 }) {
+  const fallback = getFallbackGuidance(language);
+
   if (!apiKey) {
     return {
-      ...FALLBACK_GUIDANCE,
-      explanation: "Guidance unavailable because API key is missing.",
+      ...fallback,
+      explanation:
+        language === "bm"
+          ? "Panduan tidak tersedia kerana kunci API tiada."
+          : "Guidance unavailable because API key is missing.",
     };
   }
 
@@ -95,9 +135,9 @@ User symptoms: ${selectedSymptoms.join(", ")}
 Other symptom: ${otherSymptom || "None"}
 Duration: ${duration}
 Age group: ${ageGroup}
-
 System risk level: ${risk}
 Recommended action: ${action}
+Language: ${language === "bm" ? "Bahasa Malaysia" : "English"}
 
 Return valid JSON only in this exact shape:
 {
@@ -118,6 +158,8 @@ Rules:
 - Avoid generic filler unless relevant
 - Keep wording calm, useful, and easy to understand
 - Focus on next steps, not medical certainty
+- Return the full response in ${language === "bm" ? "Bahasa Malaysia" : "English"}
+${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly formal government-style language" : ""}
 `;
 
     const result = await generateWithRetry(model, prompt, 2);
@@ -128,13 +170,10 @@ Rules:
     try {
       return JSON.parse(text);
     } catch {
-      return {
-        ...FALLBACK_GUIDANCE,
-        explanation: text || FALLBACK_GUIDANCE.explanation,
-      };
+      return fallback;
     }
   } catch (error) {
     console.error("Gemini API error:", error);
-    return FALLBACK_GUIDANCE;
+    return fallback;
   }
 }
