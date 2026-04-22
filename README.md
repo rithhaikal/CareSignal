@@ -1,73 +1,93 @@
-# React + TypeScript + Vite
+# 🩺 CareSignal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CareSignal is a lightweight symptom-checking web app that helps users decide what to do next based on how they feel — whether to monitor at home, visit a clinic, or seek emergency care.
 
-Currently, two official plugins are available:
+It combines simple rule-based logic with AI-generated guidance to provide clear, actionable next steps in seconds.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 📸 Screenshots
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Landing Page
+<img src="./docs/landing.png" width="700" />
 
-## Expanding the ESLint configuration
+### Symptom Selection
+<img src="./docs/symptoms.png" width="700" />
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Result Screen
+<img src="./docs/result.png" width="700" />
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🚀 Features
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Select symptoms from a predefined list  
+- Add custom symptoms manually  
+- Instant risk assessment (Safe, Clinic, Emergency)  
+- AI-generated guidance for next 24 hours  
+- Warning signs and escalation triggers  
+- English 🇬🇧 / Bahasa Malaysia 🇲🇾 support  
+- Find nearby clinics or hospitals via Google Maps  
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚡ How It Works
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. **Symptom Input**  
+   Users select predefined symptoms or add their own  
+
+2. **Risk Evaluation**  
+   A rule-based system determines severity instantly  
+
+3. **AI Guidance**  
+   Gemini generates structured next steps, timelines, and warning signs  
+
+4. **Language Toggle**  
+   Users can switch between English and Bahasa Malaysia  
+
+---
+
+## 🧠 Tech Stack
+
+- **Frontend**: React + TypeScript  
+- **Styling**: Tailwind CSS  
+- **AI**: Google Gemini API  
+- **State Management**: React Hooks  
+
+---
+
+## 💡 Key Design Decisions
+
+- **Instant results first**  
+  Users see severity immediately without waiting for AI  
+
+- **AI as enhancement, not dependency**  
+  Core experience works even if AI fails  
+
+- **Mobile-first UX**  
+  Sticky CTA and non-blocking flows  
+
+- **Cost-aware AI usage**  
+  Responses are cached and reused across language toggles  
+
+---
+
+## 🧪 Limitations
+
+- Not a medical diagnosis tool  
+- Uses predefined logic for severity classification  
+- AI responses may vary depending on input and API performance  
+
+---
+
+## ⚠️ Disclaimer
+
+This application is for informational purposes only and does not replace professional medical advice. Always consult a qualified healthcare provider for medical concerns.
+
+---
+
+## 📦 Setup
+
+```bash
+npm install
+npm run dev
