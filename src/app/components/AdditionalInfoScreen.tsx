@@ -22,70 +22,148 @@ export function AdditionalInfoScreen({ onCheck, onBack }: AdditionalInfoScreenPr
   const [ageGroup, setAgeGroup] = useState<string>('');
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="max-w-4xl mx-auto px-6 w-full">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={onBack}
-            className="text-sm text-[#6B7280] mb-6 hover:text-[#111] transition-colors"
-          >
-            ← Back
-          </button>
-          <h1 className="text-4xl mb-2 text-[#111] tracking-tight">Additional information</h1>
-          <p className="text-base text-[#6B7280]">Help us assess your situation</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#EAF7EF] via-white to-white font-sans">
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-28 md:pb-16">
+        {/* Top bar */}
+        <div className="mb-12 flex items-center justify-between rounded-xl border border-gray-100 bg-white px-6 py-4 shadow-sm">
+          <div className="text-xl font-bold text-[#111]">
+            <span className="text-[#2D8A3E]">Care</span>Signal
+          </div>
+
+          <span className="text-sm font-semibold text-gray-700">
+            Build with AI 2026
+          </span>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-10 mb-8">
-          {/* Duration Section */}
+        <div className="grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-start">
+          {/* Left content */}
           <div>
-            <div className="text-xs text-[#6B7280] uppercase tracking-wider mb-4">DURATION</div>
-            <div className="space-y-3">
-              {DURATIONS.map(d => (
-                <button
-                  key={d}
-                  onClick={() => setDuration(d)}
-                  className={`w-full h-14 px-4 text-sm border transition-all text-left flex items-center ${
-                    duration === d
-                      ? 'bg-[#111] border-[#111] text-white'
-                      : 'bg-white text-[#111] border-[#E5E7EB] hover:border-[#111]'
-                  }`}
-                >
-                  {d}
-                </button>
-              ))}
+            <button
+              onClick={onBack}
+              className="mb-6 text-sm text-[#6B7280] transition-colors hover:text-[#111]"
+            >
+              ← Back
+            </button>
+
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[#2D8A3E]">
+              Additional details
+            </p>
+
+            <h1 className="mb-4 text-4xl md:text-5xl font-extrabold leading-[1.05] tracking-tight text-[#0B1A24]">
+              A little more context
+            </h1>
+
+            <p className="mb-10 max-w-xl text-lg leading-relaxed text-[#6B7280]">
+              Help us assess your situation more clearly by choosing symptom duration and age group.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-10">
+              {/* Duration Section */}
+              <div>
+                <div className="mb-4 text-xs uppercase tracking-wider text-[#6B7280]">
+                  Duration
+                </div>
+                <div className="space-y-3">
+                  {DURATIONS.map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setDuration(d)}
+                      className={`w-full min-h-[58px] rounded-xl border px-4 text-sm transition-all text-left flex items-center ${
+                        duration === d
+                          ? 'bg-[#0B1A24] border-[#0B1A24] text-white'
+                          : 'bg-white text-[#111] border-[#E5E7EB] hover:border-[#2D8A3E]'
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Age Group Section */}
+              <div>
+                <div className="mb-4 text-xs uppercase tracking-wider text-[#6B7280]">
+                  Age Group
+                </div>
+                <div className="space-y-3">
+                  {AGE_GROUPS.map((age) => (
+                    <button
+                      key={age}
+                      onClick={() => setAgeGroup(age)}
+                      className={`w-full min-h-[58px] rounded-xl border px-4 text-sm transition-all text-left flex items-center ${
+                        ageGroup === age
+                          ? 'bg-[#0B1A24] border-[#0B1A24] text-white'
+                          : 'bg-white text-[#111] border-[#E5E7EB] hover:border-[#2D8A3E]'
+                      }`}
+                    >
+                      {age}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Age Group Section */}
-          <div>
-            <div className="text-xs text-[#6B7280] uppercase tracking-wider mb-4">AGE GROUP</div>
-            <div className="space-y-3">
-              {AGE_GROUPS.map(age => (
-                <button
-                  key={age}
-                  onClick={() => setAgeGroup(age)}
-                  className={`w-full h-14 px-4 text-sm border transition-all text-left flex items-center ${
-                    ageGroup === age
-                      ? 'bg-[#111] border-[#111] text-white'
-                      : 'bg-white text-[#111] border-[#E5E7EB] hover:border-[#111]'
-                  }`}
-                >
-                  {age}
-                </button>
-              ))}
+          {/* Right panel desktop only */}
+          <div className="hidden md:block rounded-xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[#2D8A3E]">
+              Before assessment
+            </p>
+
+            <h2 className="mb-3 text-2xl font-bold text-[#0B1A24]">
+              Final step before your result
+            </h2>
+
+            <p className="mb-8 text-sm leading-6 text-[#6B7280]">
+              These details help us give more relevant guidance based on how long symptoms have lasted and the age-related risk level.
+            </p>
+
+            <div className="space-y-5 mb-8">
+              <div className="rounded-lg border border-[#E5E7EB] bg-[#FAFCFF] px-4 py-4">
+                <div className="mb-1 text-xs uppercase tracking-wider text-[#6B7280]">
+                  Duration selected
+                </div>
+                <div className="text-sm font-medium text-[#111]">
+                  {duration || 'Not selected yet'}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-[#E5E7EB] bg-[#FAFCFF] px-4 py-4">
+                <div className="mb-1 text-xs uppercase tracking-wider text-[#6B7280]">
+                  Age group selected
+                </div>
+                <div className="text-sm font-medium text-[#111]">
+                  {ageGroup || 'Not selected yet'}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end border-t border-[#E5E7EB] pt-6">
+              <button
+                onClick={() => onCheck(duration, ageGroup)}
+                disabled={!duration || !ageGroup}
+                className="rounded-lg bg-[#0B1A24] px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-[#0B1A24]"
+              >
+                Get Assessment
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Check Button */}
-        <div className="pt-6 border-t border-[#E5E7EB] flex justify-end">
+      {/* Mobile sticky footer */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#E5E7EB] bg-white px-4 py-4 md:hidden">
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-sm text-[#6B7280]">
+            {duration && ageGroup ? 'Ready to assess' : 'Select both options'}
+          </div>
+
           <button
             onClick={() => onCheck(duration, ageGroup)}
             disabled={!duration || !ageGroup}
-            className="bg-[#111] text-white py-3 px-8 text-sm hover:bg-[#2B7A78] transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-[#111]"
+            className="rounded-lg bg-[#0B1A24] px-6 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
-            Get assessment
+            Get Assessment
           </button>
         </div>
       </div>

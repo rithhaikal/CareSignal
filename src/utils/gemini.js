@@ -4,21 +4,31 @@ const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 const FALLBACK_GUIDANCE = {
   explanation:
-    "We couldn't generate a personalized response right now. Please rely on the standard guidance below.",
+    "Based on the symptoms selected and the current risk level, you should continue monitoring closely and follow the guidance below.",
   next24h: {
-    morning: ["Rest", "Drink water"],
-    afternoon: ["Monitor symptoms"],
-    night: ["Seek care if symptoms worsen"],
+    morning: [
+      "Drink water regularly and avoid strenuous activity",
+      "Recheck how you feel after a few hours",
+    ],
+    afternoon: [
+      "Eat light meals if your appetite is normal",
+      "Monitor for any worsening symptoms",
+    ],
+    night: [
+      "Rest early and reassess your symptoms before sleep",
+      "Seek care if symptoms become significantly worse",
+    ],
   },
   warningSigns: [
     "Difficulty breathing",
     "Severe chest pain",
-    "Worsening confusion",
+    "Worsening confusion or weakness",
+    "Unable to keep fluids down",
   ],
   ifYouWait: [
-    "Symptoms may worsen",
-    "Complications may increase",
-    "Seek medical attention if symptoms become more severe",
+    "If symptoms stay the same for 24 hours, reassessment may be needed.",
+    "If symptoms worsen, seek medical attention sooner.",
+    "If severe warning signs appear suddenly, do not continue monitoring at home.",
   ],
 };
 
@@ -40,8 +50,6 @@ async function generateWithRetry(model, prompt, retries = 2) {
       message.includes("Service Unavailable");
 
     if (retries > 0 && isRetryable) {
-      console.warn(`Gemini busy, retrying... (${retries} left)`);
-      // Exponential backoff: 2s, 4s...
       const delay = (3 - retries) * 2000;
       await sleep(delay);
       return generateWithRetry(model, prompt, retries - 1);
@@ -60,7 +68,6 @@ export async function generateGuidance({
   otherSymptom,
 }) {
   if (!apiKey) {
-    console.error("Gemini API key missing");
     return {
       ...FALLBACK_GUIDANCE,
       explanation: "Guidance unavailable because API key is missing.",
@@ -73,8 +80,8 @@ export async function generateGuidance({
     const model = genAI.getGenerativeModel({
       model: "gemini-flash-lite-latest",
       generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens: 220,
+        temperature: 0.25,
+        maxOutputTokens: 500,
         responseMimeType: "application/json",
       },
     });
@@ -82,7 +89,7 @@ export async function generateGuidance({
     const prompt = `
 You are a healthcare guidance assistant.
 Do NOT diagnose.
-The triage decision has already been made by the system.
+The risk decision has already been made by the system.
 
 User symptoms: ${selectedSymptoms.join(", ")}
 Other symptom: ${otherSymptom || "None"}
@@ -94,22 +101,23 @@ Recommended action: ${action}
 
 Return valid JSON only in this exact shape:
 {
-  "explanation": "short explanation in plain English, max 2 sentences",
+  "explanation": "2 to 3 sentences explaining why this result was reached, referencing the selected symptoms and duration in a practical and human way",
   "next24h": {
-    "morning": ["item 1", "item 2"],
-    "afternoon": ["item 1", "item 2"],
-    "night": ["item 1", "item 2"]
+    "morning": ["specific action 1", "specific action 2"],
+    "afternoon": ["specific action 1", "specific action 2"],
+    "night": ["specific action 1", "specific action 2"]
   },
-  "warningSigns": ["item 1", "item 2", "item 3"],
-  "ifYouWait": ["item 1", "item 2", "item 3"]
+  "warningSigns": ["3 or 4 warning signs relevant to the selected symptoms"],
+  "ifYouWait": ["what to do if symptoms stay the same", "what to do if symptoms worsen", "when to seek urgent help immediately"]
 }
 
 Rules:
-- Keep everything short
-- Stay calm and practical
-- No diagnosis
-- No medical certainty
-- Focus on guidance only
+- Do not diagnose
+- Do not mention diseases unless absolutely necessary
+- Be practical and specific to the symptoms
+- Avoid generic filler unless relevant
+- Keep wording calm, useful, and easy to understand
+- Focus on next steps, not medical certainty
 `;
 
     const result = await generateWithRetry(model, prompt, 2);
@@ -119,8 +127,7 @@ Rules:
 
     try {
       return JSON.parse(text);
-    } catch (parseError) {
-      console.warn("Failed to parse Gemini JSON. Raw output:", text);
+    } catch {
       return {
         ...FALLBACK_GUIDANCE,
         explanation: text || FALLBACK_GUIDANCE.explanation,
