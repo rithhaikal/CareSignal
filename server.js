@@ -117,15 +117,6 @@ app.post("/api/gemini", async (req, res) => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: {
-        temperature: 0.25,
-        maxOutputTokens: 600,
-        responseMimeType: "application/json",
-      },
-    });
-
     const prompt = `
 You are a healthcare triage and guidance assistant.
 Do NOT diagnose any specific disease or condition.
@@ -184,10 +175,21 @@ Rules:
 ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly formal government-style language" : ""}
 `;
 
-    // Retry logic with exponential backoff for transient API errors
+    // Retry logic with fallback models for transient API errors
+    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
     let lastError;
+    
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
+        const modelName = fallbackModels[attempt] || fallbackModels[0];
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            temperature: 0.25,
+            responseMimeType: "application/json",
+          },
+        });
+
         const result = await model.generateContent(prompt);
         let text = result.response.text();
         text = text.replace(/\`\`\`json/g, "").replace(/\`\`\`/g, "").trim();
@@ -261,14 +263,6 @@ app.post("/api/gemini/chat", async (req, res) => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: {
-        temperature: 0.4,
-        maxOutputTokens: 300,
-      },
-    });
-
     // Build conversation history string for the prompt
     const conversationHistory = messages
       .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
@@ -295,12 +289,22 @@ ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly for
 Conversation:
 ${conversationHistory}
 
-Respond to the user's latest message naturally and helpfully.`;
+    Respond to the user's latest message naturally and helpfully.`;
 
-    // Retry logic with exponential backoff for transient API errors
+    // Retry logic with fallback models for transient API errors
+    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
     let lastError;
+
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
+        const modelName = fallbackModels[attempt] || fallbackModels[0];
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            temperature: 0.4,
+          },
+        });
+
         const result = await model.generateContent(prompt);
         const reply = result.response.text().trim();
         return res.json({ reply });
