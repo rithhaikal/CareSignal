@@ -53,42 +53,11 @@ It combines rule based risk logic with AI generated guidance to provide clear an
 
 ## 🏗️ Architecture
 
-```
-┌──────────────────────────────────────────────┐
-│                   Client                      │
-│  React + TypeScript + Tailwind CSS            │
-│                                               │
-│  LandingPage → SymptomScreen →                │
-│  AdditionalInfoScreen → ResultScreen          │
-│                                               │
-│  Rule-based severity:  calculateSeverity()    │
-│  AI guidance:          generateGuidance()     │
-│  Follow-up chat:       sendChatMessage()      │
-└──────────────────┬───────────────────────────┘
-                   │ POST /api/gemini
-                   │ POST /api/gemini/chat
-                   ▼
-┌──────────────────────────────────────────────┐
-│                  Server                       │
-│  Express.js (Node.js)                         │
-│                                               │
-│  • Proxies Gemini API (key stays server-side) │
-│  • Multi-turn chat with assessment context    │
-│  • Retry logic with exponential backoff       │
-│  • Input validation & rate limiting           │
-│  • Security headers via Helmet                │
-│  • Serves production build (SPA)              │
-└──────────────────┬───────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────┐
-│           Google Gemini API                   │
-│  gemini-flash-lite-latest                     │
-│  Structured JSON response (no diagnosis)      │
-└──────────────────────────────────────────────┘
-```
+CareSignal uses a lightweight client-server model:
+- **Frontend (React + Vite)**: Handles user flow, rule-based severity calculation, and UI.
+- **Backend (Express.js)**: A secure proxy server that manages Gemini API requests (keeping the API key hidden) and serves the production build.
+- **AI Engine (Google Gemini)**: Processes symptom context to return structured JSON guidance and powers the follow-up chat.
 
----
 
 ## 🧠 Tech Stack
 
@@ -102,42 +71,7 @@ It combines rule based risk logic with AI generated guidance to provide clear an
 | Deployment | Docker, Google Cloud Run |
 | State | React Hooks |
 
----
 
-## 📁 Project Structure
-
-```
-caresignal/
-├── server.js                  # Express backend (API proxy + static serving)
-├── Dockerfile                 # Multi-stage Docker build
-├── .env.example               # Required environment variables template
-├── src/
-│   ├── main.tsx               # React entry point
-│   ├── app/
-│   │   ├── App.tsx            # Root component + screen navigation
-│   │   ├── components/
-│   │   │   ├── Header.tsx     # Shared navigation header
-│   │   │   ├── ChatPanel.tsx  # Follow-up conversation panel
-│   │   │   ├── LandingPage.tsx
-│   │   │   ├── SymptomScreen.tsx
-│   │   │   ├── AdditionalInfoScreen.tsx
-│   │   │   └── ResultScreen.tsx
-│   │   └── data/
-│   │       └── resultData.ts  # Severity result configurations
-│   ├── types/
-│   │   └── index.ts           # Shared TypeScript type definitions
-│   ├── utils/
-│   │   └── gemini.ts          # API client with fallback logic
-│   └── styles/
-│       ├── index.css          # Style entry point
-│       ├── fonts.css          # Google Fonts (Inter, Sora)
-│       ├── tailwind.css       # Tailwind CSS config
-│       └── theme.css          # Design tokens + CSS variables
-├── docs/                      # Screenshots for README
-└── public/                    # Static assets (favicon, hero image)
-```
-
----
 
 ## 💡 Key Design Decisions
 
