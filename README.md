@@ -9,13 +9,13 @@ It combines rule based risk logic with AI generated guidance to provide clear an
 ## 📸 Screenshots
 
 ### Landing Page
-<img src="./docs/landing.png" width="700" />
+<img src="./docs/landing.PNG" width="700" />
 
 ### Symptom Selection
-<img src="./docs/symptoms.png" width="700" />
+<img src="./docs/symptoms.PNG" width="700" />
 
 ### Result Screen
-<img src="./docs/result.png" width="700" />
+<img src="./docs/result.PNG" width="700" />
 
 ---
 
