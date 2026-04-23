@@ -41,6 +41,9 @@ app.use(
 
 app.use(express.json());
 
+/** Trust proxy — required for Cloud Run so rate-limiter gets the real IP */
+app.set("trust proxy", 1);
+
 /** Rate limiting — 30 requests per 15 minutes per IP on API routes */
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -254,14 +257,36 @@ ${conversationHistory}
 
 Respond to the user's latest message naturally and helpfully.`;
 
-    // Single attempt (chat is lower priority than assessment)
-    const result = await model.generateContent(prompt);
-    const reply = result.response.text().trim();
+    // Retry logic with exponential backoff for transient API errors
+    let lastError;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const result = await model.generateContent(prompt);
+        const reply = result.response.text().trim();
+        return res.json({ reply });
+      } catch (err) {
+        lastError = err;
+        const status = err?.status || err?.statusCode;
+        const message = err?.message || "";
+        const isRetryable =
+          status === 503 ||
+          status === 429 ||
+          message.includes("high demand") ||
+          message.includes("Service Unavailable");
 
-    return res.json({ reply });
-  } catch (error) {
-    console.error("Chat API error:", error);
+        if (isRetryable && attempt < 2) {
+          await new Promise((r) => setTimeout(r, (attempt + 1) * 2000));
+          continue;
+        }
+        break;
+      }
+    }
+
+    console.error("Chat API error:", lastError);
     return res.status(502).json({ error: "AI service temporarily unavailable" });
+  } catch (error) {
+    console.error("Chat API server error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -270,8 +295,12 @@ Respond to the user's latest message naturally and helpfully.`;
 // ---------------------------------------------------------------------------
 
 /** Catch-all: serve React app for any non-API route (SPA client-side routing) */
-app.get("/{*splat}", (_req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+app.use((req, res, next) => {
+  if (req.method === 'GET' && req.accepts('html')) {
+    res.sendFile(path.join(__dirname, "dist", "index.html"));
+  } else {
+    next();
+  }
 });
 
 // ---------------------------------------------------------------------------
