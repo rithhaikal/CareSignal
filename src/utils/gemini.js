@@ -1,7 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
 function getFallbackGuidance(language = "en") {
   if (language === "bm") {
     return {
@@ -66,33 +62,6 @@ function getFallbackGuidance(language = "en") {
   };
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function generateWithRetry(model, prompt, retries = 2) {
-  try {
-    return await model.generateContent(prompt);
-  } catch (error) {
-    const status = error?.status || error?.statusCode;
-    const message = error?.message || "";
-
-    const isRetryable =
-      status === 503 ||
-      status === 429 ||
-      message.includes("high demand") ||
-      message.includes("Service Unavailable");
-
-    if (retries > 0 && isRetryable) {
-      const delay = (3 - retries) * 2000;
-      await sleep(delay);
-      return generateWithRetry(model, prompt, retries - 1);
-    }
-
-    throw error;
-  }
-}
-
 export async function generateGuidance({
   selectedSymptoms,
   duration,
@@ -104,76 +73,29 @@ export async function generateGuidance({
 }) {
   const fallback = getFallbackGuidance(language);
 
-  if (!apiKey) {
-    return {
-      ...fallback,
-      explanation:
-        language === "bm"
-          ? "Panduan tidak tersedia kerana kunci API tiada."
-          : "Guidance unavailable because API key is missing.",
-    };
-  }
-
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-flash-lite-latest",
-      generationConfig: {
-        temperature: 0.25,
-        maxOutputTokens: 500,
-        responseMimeType: "application/json",
-      },
+    const response = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        selectedSymptoms,
+        duration,
+        ageGroup,
+        risk,
+        action,
+        otherSymptom,
+        language,
+      }),
     });
 
-    const prompt = `
-You are a healthcare guidance assistant.
-Do NOT diagnose.
-The risk decision has already been made by the system.
-
-User symptoms: ${selectedSymptoms.join(", ")}
-Other symptom: ${otherSymptom || "None"}
-Duration: ${duration}
-Age group: ${ageGroup}
-System risk level: ${risk}
-Recommended action: ${action}
-Language: ${language === "bm" ? "Bahasa Malaysia" : "English"}
-
-Return valid JSON only in this exact shape:
-{
-  "explanation": "2 to 3 sentences explaining why this result was reached, referencing the selected symptoms and duration in a practical and human way",
-  "next24h": {
-    "morning": ["specific action 1", "specific action 2"],
-    "afternoon": ["specific action 1", "specific action 2"],
-    "night": ["specific action 1", "specific action 2"]
-  },
-  "warningSigns": ["3 or 4 warning signs relevant to the selected symptoms"],
-  "ifYouWait": ["what to do if symptoms stay the same", "what to do if symptoms worsen", "when to seek urgent help immediately"]
-}
-
-Rules:
-- Do not diagnose
-- Do not mention diseases unless absolutely necessary
-- Be practical and specific to the symptoms
-- Avoid generic filler unless relevant
-- Keep wording calm, useful, and easy to understand
-- Focus on next steps, not medical certainty
-- Return the full response in ${language === "bm" ? "Bahasa Malaysia" : "English"}
-${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly formal government-style language" : ""}
-`;
-
-    const result = await generateWithRetry(model, prompt, 2);
-
-    let text = result.response.text();
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
-    try {
-      return JSON.parse(text);
-    } catch {
+    if (!response.ok) {
+      console.error("Backend API error:", response.status);
       return fallback;
     }
+
+    return await response.json();
   } catch (error) {
-    console.error("Gemini API error:", error);
+    console.error("Network error:", error);
     return fallback;
   }
 }
