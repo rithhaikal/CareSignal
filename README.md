@@ -2,7 +2,7 @@
 
 CareSignal is a lightweight symptom-checking web app that helps users decide what to do next based on how they feel — whether to monitor at home, visit a clinic, or seek emergency care.
 
-It combines simple rule-based logic with AI-generated guidance to provide clear, actionable next steps in seconds.
+It combines rule-based risk logic with AI-generated guidance to provide clear, structured next steps in seconds.
 
 ---
 
@@ -62,13 +62,31 @@ It combines simple rule-based logic with AI-generated guidance to provide clear,
   Users see severity immediately without waiting for AI  
 
 - **AI as enhancement, not dependency**  
-  Core experience works even if AI fails  
+  The core system works even if AI fails or is unavailable  
 
 - **Mobile-first UX**  
-  Sticky CTA and non-blocking flows  
+  Designed to avoid scrolling friction with sticky actions  
 
 - **Cost-aware AI usage**  
-  Responses are cached and reused across language toggles  
+  AI responses are reused across language toggles to reduce API calls  
+
+- **Structured output design**  
+  AI is constrained to return predictable JSON for reliability  
+
+---
+
+## 🤖 AI Usage Disclosure
+
+This project uses AI-assisted tools during development, including ChatGPT and Google Gemini.
+
+AI was used to:
+- Assist with UI implementation and iteration  
+- Help structure and refine prompt design  
+- Generate contextual guidance for users based on symptoms  
+
+The core system design — including risk classification logic, UX flow, and decision structure — was built and defined manually.
+
+All AI-generated outputs are constrained, validated, and integrated into a controlled system. The team understands and can explain all parts of the codebase and architecture.
 
 ---
 
