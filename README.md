@@ -1,8 +1,8 @@
 # 🩺 CareSignal
 
-CareSignal is a lightweight symptom-checking web app that helps users decide what to do next based on how they feel — whether to monitor at home, visit a clinic, or seek emergency care.
+CareSignal is a lightweight symptom checking web app that helps users decide what to do next based on how they feel. Whether to monitor at home, visit a clinic, or seek emergency care.
 
-It combines rule-based risk logic with AI-generated guidance to provide clear, structured next steps in seconds.
+It combines rule based risk logic with AI generated guidance to provide clear and structured next steps in seconds.
 
 ---
 
@@ -24,69 +24,69 @@ It combines rule-based risk logic with AI-generated guidance to provide clear, s
 - Select symptoms from a predefined list  
 - Add custom symptoms manually  
 - Instant risk assessment (Safe, Clinic, Emergency)  
-- AI-generated guidance for next 24 hours  
+- AI generated guidance for next 24 hours  
 - Warning signs and escalation triggers  
-- English 🇬🇧 / Bahasa Malaysia 🇲🇾 support  
+- English 🇬🇧 and Bahasa Malaysia 🇲🇾 support  
 - Find nearby clinics or hospitals via Google Maps  
 
 ---
 
 ## ⚡ How It Works
 
-1. **Symptom Input**  
+1. Symptom Input  
    Users select predefined symptoms or add their own  
 
-2. **Risk Evaluation**  
-   A rule-based system determines severity instantly  
+2. Risk Evaluation  
+   A rule based system determines severity instantly  
 
-3. **AI Guidance**  
+3. AI Guidance  
    Gemini generates structured next steps, timelines, and warning signs  
 
-4. **Language Toggle**  
+4. Language Toggle  
    Users can switch between English and Bahasa Malaysia  
 
 ---
 
 ## 🧠 Tech Stack
 
-- **Frontend**: React + TypeScript  
-- **Styling**: Tailwind CSS  
-- **AI**: Google Gemini API  
-- **State Management**: React Hooks  
+- Frontend React with TypeScript  
+- Styling Tailwind CSS  
+- AI Google Gemini API  
+- State Management React Hooks  
 
 ---
 
 ## 💡 Key Design Decisions
 
-- **Instant results first**  
+- Instant results first  
   Users see severity immediately without waiting for AI  
 
-- **AI as enhancement, not dependency**  
+- AI as enhancement not dependency  
   The core system works even if AI fails or is unavailable  
 
-- **Mobile-first UX**  
-  Designed to avoid scrolling friction with sticky actions  
+- Mobile first UX  
+  Designed to reduce scrolling friction with sticky actions  
 
-- **Cost-aware AI usage**  
+- Cost aware AI usage  
   AI responses are reused across language toggles to reduce API calls  
 
-- **Structured output design**  
+- Structured output design  
   AI is constrained to return predictable JSON for reliability  
 
 ---
 
 ## 🤖 AI Usage Disclosure
 
-This project uses AI-assisted tools during development, including ChatGPT and Google Gemini.
+This project uses AI assisted tools during development including ChatGPT and Google Gemini.
 
 AI was used to:
 - Assist with UI implementation and iteration  
 - Help structure and refine prompt design  
-- Generate contextual guidance for users based on symptoms  
+- Generate contextual guidance based on symptoms  
 
-The core system design — including risk classification logic, UX flow, and decision structure — was built and defined manually.
+The core system design including risk classification logic, UX flow, and decision structure was built manually.
 
-All AI-generated outputs are constrained, validated, and integrated into a controlled system. The team understands and can explain all parts of the codebase and architecture.
+All AI generated outputs are constrained, validated, and integrated into a controlled system. The team understands and can explain all parts of the codebase and architecture.
 
 ---
 
