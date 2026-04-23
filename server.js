@@ -118,7 +118,7 @@ app.post("/api/gemini", async (req, res) => {
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",   // Flash for fast + accurate clinical triage reasoning
+      model: "gemini-2.5-flash",
       generationConfig: {
         temperature: 0.25,
         maxOutputTokens: 600,
@@ -262,7 +262,7 @@ app.post("/api/gemini/chat", async (req, res) => {
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-lite",   // Flash-Lite for low-latency conversational follow-up
+      model: "gemini-2.5-flash",
       generationConfig: {
         temperature: 0.4,
         maxOutputTokens: 300,
