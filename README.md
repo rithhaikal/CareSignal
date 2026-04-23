@@ -46,29 +46,42 @@ It uses an AI-driven triage engine, backed by local risk logic, to provide clear
 
 ---
 
-## 🌍 Problem and Impact
+## 🌍 Problem & National Impact (Track 3: Vital Signs)
 
-Many users are unsure whether their symptoms require urgent care or can be safely monitored at home. This leads to panic, delayed treatment, or unnecessary hospital visits.
+**The Problem:** Many Malaysians are unsure whether their symptoms require urgent care or can be safely monitored at home. This leads to two critical issues: panic-driven overcrowding in Emergency Departments (EDs) or dangerous delays in seeking necessary care.
 
-CareSignal reduces uncertainty by providing immediate risk assessment and clear next step guidance in seconds.
+**National Alignment:** CareSignal directly addresses **Track 3: Vital Signs** of the MyAI Future Hackathon. By providing instant, accessible triage, it aligns with the **MyDIGITAL blueprint** and **NIMP 2030** goals for digital public health infrastructure, specifically addressing the strain on public hospitals as Malaysia transitions to an "Aged Society".
 
 ---
 
-## 🏗️ Architecture and Tech Stack
+## 🏗️ Architecture & Agentic Workflow
 
-CareSignal uses a simple and scalable client server model:
+CareSignal implements a **Two-Layer Agentic AI Architecture** built entirely on the Google AI Ecosystem Stack, transitioning from a simple chat interface to an autonomous, context-aware execution system.
 
-- **Frontend**  
-  React 19, TypeScript, Vite, Tailwind CSS  
-  Handles UI, symptom flow, and rule based severity logic  
+```mermaid
+graph TD
+    A[User Input: Symptoms, Duration, Age] --> B[Express Backend / Proxy Server]
+    B --> C{Layer 1: AI Triage Engine}
+    C -->|Gemini 2.5 Flash| D[Structured JSON Guidance & Severity]
+    D --> E[React Frontend: Action Plan]
+    
+    E --> F[User asks follow-up question]
+    F --> G{Layer 2: Ask CareSignal Agent}
+    G -->|Gemini 2.5 Flash| H[Context-Aware Multi-turn Reasoning]
+    H --> E
+```
 
-- **Backend**  
-  Express.js  
-  Acts as a secure proxy for Gemini API and serves production build  
+### 🧠 The Agentic Workflow
+Unlike a standard chatbot, **Ask CareSignal operates as an Agentic AI system**:
+1. **Context Injection:** It autonomously ingests the full symptom array, severity level, and demographic data *before* the conversation begins.
+2. **Stateful Reasoning:** The backend `/api/gemini/chat` endpoint maintains full conversation history across multiple turns, allowing Gemini to reason over prior messages.
+3. **Constrained Action:** The agent is strictly prompted to provide actionable, practical follow-up guidance anchored to the user's initial triage result, rather than generic medical trivia.
 
-- **AI Engine**  
-  Google Gemini  
-  Generates structured JSON guidance based on user input  
+### 💻 Tech Stack
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS (Mobile-first UX)
+- **Backend:** Node.js, Express.js (Secure Proxy, Rate Limiting, Helmet)
+- **AI Engine:** Google Gemini (`gemini-2.5-flash` for both triage and chat)
+- **Deployment:** Dockerized and deployed serverless on **Google Cloud Run**  
 
 ---
 
@@ -93,21 +106,18 @@ CareSignal uses a simple and scalable client server model:
 
 ## 🤖 AI Usage Disclosure
 
-This project uses AI tools including ChatGPT and Google Gemini.
+This project strictly adheres to the "Build with AI" mandate and ethical guidelines.
 
-AI was used to:
-- Assist with UI implementation and iteration  
-- Help refine prompt structure  
-- Generate structured health guidance based on user input  
+**Google AI Ecosystem Used:**
+- **Gemini 2.5 Flash** acts as the core intelligence engine for both the triage assessment and the agentic follow-up chat.
+- **Google Cloud Run** hosts the serverless deployment.
 
-The core system design including:
-- Risk classification logic  
-- User flow and interaction design  
-- Decision making structure  
+**Development Tools:**
+- AI coding tools (ChatGPT, Google Gemini) were used to assist with UI boilerplate and prompt refinement.
+- **The core system design** (risk classification logic, rate-limiting proxy, bilingual caching, and multi-turn context management) was implemented manually by the team.
 
-was designed and implemented manually.
-
-All AI outputs are constrained, validated, and integrated into a controlled system. The team is able to explain and justify all parts of the codebase during evaluation.
+**Safety & Limitations:**
+All AI outputs are constrained via strict system prompts and validated before reaching the client. A hard-coded local fallback logic exists to ensure users always receive guidance even if the AI service degrades. The system does not diagnose diseases.
 
 ---
 
