@@ -82,7 +82,7 @@ export function LandingPage({ onCheckNow, language, onToggleLanguage }: LandingP
           </div>
           <div className="relative flex justify-end">
             <img
-              src="/hero.png"
+              src="/hero.webp"
               alt="CareSignal symptom guidance illustration"
               className="w-full max-w-2xl scale-110 drop-shadow-2xl object-contain mix-blend-darken"
             />
