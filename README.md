@@ -1,8 +1,8 @@
 # 🩺 CareSignal
 
-CareSignal is a lightweight symptom checking web app that helps users decide whether to monitor at home, visit a clinic, or seek emergency care based on how they feel. 
+CareSignal is a lightweight symptom checking web app that helps users decide whether to monitor at home, visit a clinic, or seek emergency care based on how they feel.
 
-It combines rule-based risk logic with AI-generated guidance to provide clear next steps in seconds.
+It combines rule based risk logic with AI generated guidance to provide clear next steps in seconds.
 
 ---
 
@@ -16,19 +16,98 @@ It combines rule-based risk logic with AI-generated guidance to provide clear ne
 
 ## 🚀 Features
 
-- **Instant Risk Assessment:** Rule-based evaluation determines severity instantly (Safe, Clinic, Emergency).
-- **AI Guidance & Follow-up:** Gemini generates structured next steps and allows users to ask contextual follow-up questions.
-- **Multilingual:** English 🇬🇧 and Bahasa Malaysia 🇲🇾 support.
-- **Nearby Clinics:** Find nearby healthcare facilities via Google Maps integration.
+- **Instant Risk Assessment**  
+  Rule based evaluation determines severity instantly (Safe, Clinic, Emergency)
+
+- **AI Guidance and Follow up**  
+  Gemini generates structured next steps and supports contextual follow up
+
+- **Multilingual Support**  
+  English 🇬🇧 and Bahasa Malaysia 🇲🇾
+
+- **Nearby Care Finder**  
+  Opens Google Maps to find nearby clinics or hospitals
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+## ⚡ How It Works
 
-CareSignal uses a lightweight client-server model:
-- **Frontend (React 19 + Vite + Tailwind v4):** Handles user flow, rule-based severity calculation, and UI.
-- **Backend (Express.js):** A secure proxy server that manages Gemini API requests (keeping your API key hidden) and serves the production build.
-- **AI Engine (Google Gemini):** Processes symptom context to return structured guidance and powers the chat.
+1. **Symptom Input**  
+   Users select predefined symptoms or add custom ones  
+
+2. **Risk Evaluation**  
+   A rule based system determines severity instantly  
+
+3. **AI Guidance**  
+   Gemini generates structured next steps, timelines, and warning signs  
+
+4. **Language Toggle**  
+   Users can switch between English and Bahasa Malaysia without regenerating core results  
+
+---
+
+## 🌍 Problem and Impact
+
+Many users are unsure whether their symptoms require urgent care or can be safely monitored at home. This leads to panic, delayed treatment, or unnecessary hospital visits.
+
+CareSignal reduces uncertainty by providing immediate risk assessment and clear next step guidance in seconds.
+
+---
+
+## 🏗️ Architecture and Tech Stack
+
+CareSignal uses a simple and scalable client server model:
+
+- **Frontend**  
+  React 19, TypeScript, Vite, Tailwind CSS  
+  Handles UI, symptom flow, and rule based severity logic  
+
+- **Backend**  
+  Express.js  
+  Acts as a secure proxy for Gemini API and serves production build  
+
+- **AI Engine**  
+  Google Gemini  
+  Generates structured JSON guidance based on user input  
+
+---
+
+## 🧠 Key Design Decisions
+
+- **Instant results first**  
+  Users see severity immediately without waiting for AI  
+
+- **AI as enhancement not dependency**  
+  Core experience works even if AI fails  
+
+- **Mobile first UX**  
+  Designed with sticky actions and low friction flows  
+
+- **Cost aware AI usage**  
+  Responses are reused across language toggles to reduce API calls  
+
+- **Structured AI output**  
+  AI is constrained to return predictable JSON for reliability  
+
+---
+
+## 🤖 AI Usage Disclosure
+
+This project uses AI tools including ChatGPT and Google Gemini.
+
+AI was used to:
+- Assist with UI implementation and iteration  
+- Help refine prompt structure  
+- Generate structured health guidance based on user input  
+
+The core system design including:
+- Risk classification logic  
+- User flow and interaction design  
+- Decision making structure  
+
+was designed and implemented manually.
+
+All AI outputs are constrained, validated, and integrated into a controlled system. The team is able to explain and justify all parts of the codebase during evaluation.
 
 ---
 
