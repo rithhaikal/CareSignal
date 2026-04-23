@@ -88,7 +88,7 @@ export function SymptomScreen({ onNext, onBack, language, onToggleLanguage }: Sy
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#EAF7EF] via-white to-white font-sans">
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-28 md:pb-16">
-        <Header language={language} onToggleLanguage={onToggleLanguage} className="mb-12" />
+        <Header language={language} onToggleLanguage={onToggleLanguage} onLogoClick={onBack} className="mb-12" />
 
         <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-12 items-start">
           {/* Left column — symptom selection */}

@@ -108,7 +108,7 @@ export function ResultScreen({
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#EAF7EF] via-white to-white font-sans">
         <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
-          <Header language={language} onToggleLanguage={onToggleLanguage} className="mb-12" />
+          <Header language={language} onToggleLanguage={onToggleLanguage} onLogoClick={onRestart} className="mb-12" />
           <div className="max-w-3xl mx-auto flex flex-col items-center justify-center text-center py-24">
             <div className="w-14 h-14 border-4 border-[#D1D5DB] border-t-[#0B1A24] rounded-full animate-spin mb-8"></div>
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[#2D8A3E]">
@@ -152,7 +152,7 @@ export function ResultScreen({
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#EAF7EF] via-white to-white font-sans">
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
-        <Header language={language} onToggleLanguage={onToggleLanguage} className="mb-12" />
+        <Header language={language} onToggleLanguage={onToggleLanguage} onLogoClick={onRestart} className="mb-12" />
 
         <div className="max-w-4xl mx-auto">
           {/* Severity banner */}

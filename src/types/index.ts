@@ -25,14 +25,14 @@ export interface GuidanceRequest {
   selectedSymptoms: string[];
   duration: string;
   ageGroup: string;
-  risk: string;
-  action: string;
   otherSymptom: string;
   language?: Language;
 }
 
 /** Structured AI guidance response returned by Gemini */
 export interface GuidanceResponse {
+  /** AI-determined severity level (safe, clinic, or emergency) */
+  severity?: Severity;
   explanation: string;
   next24h: {
     morning: string[];

@@ -13,6 +13,8 @@ interface AdditionalInfoScreenProps {
   onCheck: (duration: string, ageGroup: string) => void;
   /** Callback to return to symptom selection */
   onBack: () => void;
+  /** Callback to restart and go to landing page */
+  onRestart: () => void;
   /** Current active language */
   language: Language;
   /** Callback to switch between EN and BM */
@@ -31,7 +33,7 @@ const AGE_GROUPS = {
   bm: ['Kanak-kanak (bawah 18)', 'Dewasa (18-64)', 'Warga emas (65+)'],
 };
 
-export function AdditionalInfoScreen({ onCheck, onBack, language, onToggleLanguage }: AdditionalInfoScreenProps) {
+export function AdditionalInfoScreen({ onCheck, onBack, onRestart, language, onToggleLanguage }: AdditionalInfoScreenProps) {
   const [duration, setDuration] = useState<string>('');
   const [ageGroup, setAgeGroup] = useState<string>('');
 
@@ -79,7 +81,7 @@ export function AdditionalInfoScreen({ onCheck, onBack, language, onToggleLangua
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#EAF7EF] via-white to-white font-sans">
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-28 md:pb-16">
-        <Header language={language} onToggleLanguage={onToggleLanguage} className="mb-12" />
+        <Header language={language} onToggleLanguage={onToggleLanguage} onLogoClick={onRestart} className="mb-12" />
 
         <div className="grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-start">
           {/* Left column — duration and age group selection */}

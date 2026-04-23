@@ -79,16 +79,27 @@ app.post("/api/gemini", async (req, res) => {
     selectedSymptoms,
     duration,
     ageGroup,
-    risk,
-    action,
     otherSymptom,
     language = "en",
   } = req.body;
 
-  if (!Array.isArray(selectedSymptoms) || selectedSymptoms.length === 0) {
+  if (!Array.isArray(selectedSymptoms)) {
     return res
       .status(400)
-      .json({ error: "selectedSymptoms must be a non-empty array" });
+      .json({ error: "selectedSymptoms must be an array" });
+  }
+
+  // Allow through if either predefined symptoms or a custom symptom is provided
+  if (selectedSymptoms.length === 0 && (!otherSymptom || !otherSymptom.trim())) {
+    return res
+      .status(400)
+      .json({ error: "At least one symptom (selected or custom) is required" });
+  }
+
+  // Build a combined symptom list for the AI prompt
+  const allSymptoms = [...selectedSymptoms];
+  if (otherSymptom && otherSymptom.trim()) {
+    allSymptoms.push(otherSymptom.trim());
   }
   if (typeof duration !== "string" || !duration.trim()) {
     return res.status(400).json({ error: "duration is required" });
@@ -110,43 +121,65 @@ app.post("/api/gemini", async (req, res) => {
       model: "gemini-flash-lite-latest",
       generationConfig: {
         temperature: 0.25,
-        maxOutputTokens: 500,
+        maxOutputTokens: 600,
         responseMimeType: "application/json",
       },
     });
 
     const prompt = `
-You are a healthcare guidance assistant.
-Do NOT diagnose.
-The risk decision has already been made by the system.
+You are a healthcare triage and guidance assistant.
+Do NOT diagnose any specific disease or condition.
 
-User symptoms: ${selectedSymptoms.join(", ")}
-Other symptom: ${otherSymptom || "None"}
+Your job is to:
+1. Assess the severity of the user's symptoms and determine the appropriate risk level
+2. Provide practical next-step guidance based on that assessment
+
+All reported symptoms: ${allSymptoms.join(", ")}
 Duration: ${duration}
 Age group: ${ageGroup}
-System risk level: ${risk}
-Recommended action: ${action}
 Language: ${language === "bm" ? "Bahasa Malaysia" : "English"}
+
+SEVERITY ASSESSMENT RULES:
+Determine the severity as one of exactly three values: "safe", "clinic", or "emergency".
+
+Use "emergency" if ANY of these apply:
+- Symptoms suggest a life-threatening condition (e.g., severe bleeding, unconsciousness, seizure, stroke signs, severe chest pain, inability to breathe, choking, paralysis, severe allergic reaction)
+- Multiple severe symptoms combined with prolonged duration
+- Symptoms in elderly (65+) that indicate rapid deterioration
+
+Use "clinic" if ANY of these apply:
+- Symptoms are concerning but not immediately life-threatening (e.g., persistent fever, blood in urine/stool, moderate pain lasting days, worsening rash, signs of infection)
+- 3 or more symptoms present together
+- Symptoms have lasted more than 2 days without improvement
+- Patient is elderly (65+) with any notable symptoms
+- Symptoms that need professional assessment but not emergency care
+
+Use "safe" if:
+- Symptoms are mild and manageable at home (e.g., mild headache, slight cough, minor fatigue)
+- Fewer than 3 mild symptoms
+- Short duration with no red flags
 
 Return valid JSON only in this exact shape:
 {
-  "explanation": "2 to 3 sentences explaining why this result was reached, referencing the selected symptoms and duration in a practical and human way",
+  "severity": "safe" | "clinic" | "emergency",
+  "explanation": "2 to 3 sentences explaining why this severity level was determined, referencing the specific symptoms and duration in a practical and human way",
   "next24h": {
     "morning": ["specific action 1", "specific action 2"],
     "afternoon": ["specific action 1", "specific action 2"],
     "night": ["specific action 1", "specific action 2"]
   },
-  "warningSigns": ["3 or 4 warning signs relevant to the selected symptoms"],
+  "warningSigns": ["3 or 4 warning signs relevant to the reported symptoms that would require escalation"],
   "ifYouWait": ["what to do if symptoms stay the same", "what to do if symptoms worsen", "when to seek urgent help immediately"]
 }
 
 Rules:
-- Do not diagnose
-- Do not mention diseases unless absolutely necessary
-- Be practical and specific to the symptoms
-- Avoid generic filler unless relevant
+- The severity field MUST be exactly one of: "safe", "clinic", "emergency"
+- Do not diagnose or name specific diseases unless absolutely necessary
+- Be practical and specific to the symptoms reported
+- Avoid generic filler
 - Keep wording calm, useful, and easy to understand
 - Focus on next steps, not medical certainty
+- Your explanation and tone MUST match the severity: emergency = urgent, clinic = important, safe = reassuring
 - Return the full response in ${language === "bm" ? "Bahasa Malaysia" : "English"}
 ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly formal government-style language" : ""}
 `;
@@ -157,9 +190,16 @@ ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly for
       try {
         const result = await model.generateContent(prompt);
         let text = result.response.text();
-        text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+        text = text.replace(/\`\`\`json/g, "").replace(/\`\`\`/g, "").trim();
 
         const parsed = JSON.parse(text);
+
+        // Validate and normalize the AI-returned severity
+        const validSeverities = ["safe", "clinic", "emergency"];
+        if (!parsed.severity || !validSeverities.includes(parsed.severity)) {
+          parsed.severity = "clinic"; // Default to clinic if AI returns invalid severity
+        }
+
         return res.json(parsed);
       } catch (err) {
         lastError = err;

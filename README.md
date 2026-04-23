@@ -2,7 +2,7 @@
 
 CareSignal is a lightweight symptom checking web app that helps users decide whether to monitor at home, visit a clinic, or seek emergency care based on how they feel.
 
-It combines rule based risk logic with AI generated guidance to provide clear next steps in seconds.
+It uses an AI-driven triage engine, backed by local risk logic, to provide clear and reliable next steps in seconds.
 
 ---
 
@@ -16,11 +16,11 @@ It combines rule based risk logic with AI generated guidance to provide clear ne
 
 ## 🚀 Features
 
-- **Instant Risk Assessment**  
-  Rule based evaluation determines severity instantly (Safe, Clinic, Emergency)
+- **AI-Driven Risk Assessment**  
+  Gemini analyzes symptoms to instantly determine severity (Safe, Clinic, Emergency)
 
-- **AI Guidance and Follow up**  
-  Gemini generates structured next steps and supports contextual follow up
+- **Structured Guidance and Follow up**  
+  Generates context-aware next steps, timelines, and supports conversational follow up
 
 - **Multilingual Support**  
   English 🇬🇧 and Bahasa Malaysia 🇲🇾
@@ -36,7 +36,7 @@ It combines rule based risk logic with AI generated guidance to provide clear ne
    Users select predefined symptoms or add custom ones  
 
 2. **Risk Evaluation**  
-   A rule based system determines severity instantly  
+   The AI (with a local fallback) instantly determines the severity  
 
 3. **AI Guidance**  
    Gemini generates structured next steps, timelines, and warning signs  
@@ -74,11 +74,11 @@ CareSignal uses a simple and scalable client server model:
 
 ## 🧠 Key Design Decisions
 
-- **Instant results first**  
-  Users see severity immediately without waiting for AI  
+- **AI-driven triage first**  
+  Gemini is used as the core decision engine for highly accurate severity assessment  
 
-- **AI as enhancement not dependency**  
-  Core experience works even if AI fails  
+- **Robust local fallback**  
+  The core experience relies on a local rule-based system if the AI API fails  
 
 - **Mobile first UX**  
   Designed with sticky actions and low friction flows  

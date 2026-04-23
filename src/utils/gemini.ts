@@ -97,8 +97,6 @@ export async function generateGuidance(request: GuidanceRequest): Promise<Guidan
     selectedSymptoms,
     duration,
     ageGroup,
-    risk,
-    action,
     otherSymptom,
     language = 'en',
   } = request;
@@ -113,8 +111,6 @@ export async function generateGuidance(request: GuidanceRequest): Promise<Guidan
         selectedSymptoms,
         duration,
         ageGroup,
-        risk,
-        action,
         otherSymptom,
         language,
       }),

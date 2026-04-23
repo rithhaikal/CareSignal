@@ -11,19 +11,25 @@ interface HeaderProps {
   language: Language;
   /** Callback to switch between EN and BM */
   onToggleLanguage: () => void;
+  /** Optional callback when logo is clicked (e.g. navigate to landing) */
+  onLogoClick?: () => void;
   /** Optional additional CSS classes (e.g. 'mb-12' for inner pages) */
   className?: string;
 }
 
-export function Header({ language, onToggleLanguage, className = '' }: HeaderProps) {
+export function Header({ language, onToggleLanguage, onLogoClick, className = '' }: HeaderProps) {
   return (
     <header
       className={`flex items-center justify-between rounded-xl border border-gray-100 bg-white px-6 py-4 shadow-sm ${className}`}
     >
       {/* App logo */}
-      <div className="text-xl font-bold text-[#111]">
+      <button
+        onClick={onLogoClick}
+        className="text-xl font-bold text-[#111] cursor-pointer bg-transparent border-none p-0 hover:opacity-80 transition-opacity"
+        aria-label="Go to home page"
+      >
         <span className="text-[#2D8A3E]">Care</span>Signal
-      </div>
+      </button>
 
       <div className="flex items-center gap-3">
         {/* Language toggle */}

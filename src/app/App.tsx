@@ -59,43 +59,60 @@ export default function App() {
   // Helpers
   // -------------------------------------------------------------------------
 
-  /** Returns the recommended action text based on severity and language */
-  const getActionText = (currentSeverity: Severity, currentLanguage: Language) => {
-    if (currentSeverity === 'clinic') {
-      return currentLanguage === 'bm'
-        ? 'Kunjungi klinik dalam masa 24 jam'
-        : 'Visit a clinic within 24 hours';
-    }
-
-    if (currentSeverity === 'emergency') {
-      return currentLanguage === 'bm'
-        ? 'Pergi ke rawatan kecemasan sekarang'
-        : 'Go to emergency care now';
-    }
-
-    return currentLanguage === 'bm' ? 'Pantau di rumah' : 'Monitor at home';
-  };
 
   /**
-   * Determines risk severity based on symptom combination, duration, and age.
+   * Determines risk severity based on symptom combination, duration, age,
+   * and free-text custom symptom input.
+   *
    * Critical symptoms (Chest Pain, Breathing Difficulty, Confusion) → emergency.
+   * Severe keywords in otherSymptom (bleeding, unconscious, seizure, etc.) → emergency.
+   * Concerning keywords in otherSymptom (blood, swelling, vomiting blood, etc.) → clinic.
    * 3+ symptoms, prolonged duration, or elderly age group → clinic.
    * Otherwise → safe to monitor at home.
    */
   const calculateSeverity = (
     selectedSymptoms: string[],
     selectedDuration: string,
-    selectedAgeGroup: string
+    selectedAgeGroup: string,
+    customSymptom: string = ''
   ): Severity => {
     const criticalSymptoms = ['Chest Pain', 'Breathing Difficulty', 'Confusion'];
     const hasCritical = selectedSymptoms.some((s) => criticalSymptoms.includes(s));
 
-    if (hasCritical || (selectedSymptoms.length >= 5 && selectedDuration === 'More than 2 days')) {
+    // Check free-text otherSymptom for emergency-level keywords
+    const lowerOther = customSymptom.toLowerCase().trim();
+    const emergencyKeywords = [
+      'bleeding', 'unconscious', 'seizure', 'not breathing',
+      'choking', 'paralysis', 'stroke', 'heart attack',
+      'severe pain', 'unresponsive', 'collapsed', 'coughing blood',
+      'vomiting blood', 'blood in stool', 'suicidal', 'overdose',
+      'severe bleeding', 'heavy bleeding', 'pendarahan teruk',
+      'tidak sedar', 'sawan', 'lumpuh', 'sesak nafas teruk',
+      'sakit dada teruk', 'pengsan',
+    ];
+    const hasEmergencyOther = lowerOther.length > 0 &&
+      emergencyKeywords.some((kw) => lowerOther.includes(kw));
+
+    // Check free-text for clinic-level keywords
+    const clinicKeywords = [
+      'blood', 'swelling', 'rash', 'high fever', 'severe',
+      'infection', 'pus', 'fracture', 'broken', 'sprain',
+      'persistent', 'worsening', 'recurring',
+      'darah', 'bengkak', 'ruam', 'demam tinggi', 'teruk',
+      'jangkitan', 'nanah', 'patah', 'retak',
+    ];
+    const hasClinicOther = lowerOther.length > 0 &&
+      clinicKeywords.some((kw) => lowerOther.includes(kw));
+
+    const totalSymptomCount = selectedSymptoms.length + (lowerOther.length > 0 ? 1 : 0);
+
+    if (hasCritical || hasEmergencyOther || (totalSymptomCount >= 5 && selectedDuration === 'More than 2 days')) {
       return 'emergency';
     }
 
     if (
-      selectedSymptoms.length >= 3 ||
+      hasClinicOther ||
+      totalSymptomCount >= 3 ||
       selectedDuration === 'More than 2 days' ||
       selectedAgeGroup.includes('65+')
     ) {
@@ -112,20 +129,15 @@ export default function App() {
   /** Generates and caches AI guidance for a specific language */
   const generateAndStoreGuidance = async (
     targetLanguage: Language,
-    currentSeverity: Severity,
     currentSymptoms: string[],
     currentDuration: string,
     currentAgeGroup: string,
     currentOtherSymptom: string
   ) => {
-    const action = getActionText(currentSeverity, targetLanguage);
-
     const geminiResult = await generateGuidance({
       selectedSymptoms: currentSymptoms,
       duration: currentDuration,
       ageGroup: currentAgeGroup,
-      risk: currentSeverity,
-      action,
       otherSymptom: currentOtherSymptom,
       language: targetLanguage,
     });
@@ -149,7 +161,7 @@ export default function App() {
     if (
       screen === 'result' &&
       !guidanceByLang[newLanguage] &&
-      symptoms.length > 0 &&
+      (symptoms.length > 0 || otherSymptom.trim()) &&
       duration &&
       ageGroup
     ) {
@@ -157,7 +169,6 @@ export default function App() {
 
       await generateAndStoreGuidance(
         newLanguage,
-        severity,
         symptoms,
         duration,
         ageGroup,
@@ -180,24 +191,28 @@ export default function App() {
     setScreen('info');
   };
 
-  /** Runs severity calculation, fetches AI guidance, and shows result */
+  /** Fetches AI-driven assessment, falls back to local severity calculation */
   const handleCheck = async (selectedDuration: string, selectedAgeGroup: string) => {
     setDuration(selectedDuration);
     setAgeGroup(selectedAgeGroup);
 
-    const result = calculateSeverity(symptoms, selectedDuration, selectedAgeGroup);
-    setSeverity(result);
+    // Calculate local severity as a fallback
+    const fallbackSeverity = calculateSeverity(symptoms, selectedDuration, selectedAgeGroup, otherSymptom);
+    setSeverity(fallbackSeverity);
     setScreen('loading');
 
     const geminiResult = await generateGuidance({
       selectedSymptoms: symptoms,
       duration: selectedDuration,
       ageGroup: selectedAgeGroup,
-      risk: result,
-      action: getActionText(result, language),
       otherSymptom,
       language,
     });
+
+    // Use AI-determined severity if available, otherwise keep local fallback
+    if (geminiResult.severity && ['safe', 'clinic', 'emergency'].includes(geminiResult.severity)) {
+      setSeverity(geminiResult.severity);
+    }
 
     setGuidanceByLang({
       en: language === 'en' ? geminiResult : null,
@@ -265,6 +280,7 @@ export default function App() {
         <AdditionalInfoScreen
           onCheck={handleCheck}
           onBack={handleBackToSymptoms}
+          onRestart={handleRestart}
           language={language}
           onToggleLanguage={toggleLanguage}
         />
@@ -274,7 +290,7 @@ export default function App() {
       {screen === 'loading' && (
         <div className="min-h-screen bg-gradient-to-br from-[#EAF7EF] via-white to-white font-sans">
           <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
-            <Header language={language} onToggleLanguage={toggleLanguage} className="mb-12" />
+            <Header language={language} onToggleLanguage={toggleLanguage} onLogoClick={handleRestart} className="mb-12" />
 
             <div className="max-w-3xl mx-auto flex flex-col items-center justify-center text-center py-24">
               <div className="w-14 h-14 border-4 border-[#D1D5DB] border-t-[#0B1A24] rounded-full animate-spin mb-8"></div>
