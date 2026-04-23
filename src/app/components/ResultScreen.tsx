@@ -230,8 +230,8 @@ export function ResultScreen({
                 <div className="px-6 pb-6">
                   <div className="mb-3 text-xs uppercase tracking-wider text-[#C92A2A]">{t.seekSooner}</div>
                   <ul className="space-y-2">
-                    {warningSigns.map((item: string, i: number) => (
-                      <li key={i} className="text-sm text-[#111]">{item}</li>
+                    {warningSigns.map((item: string) => (
+                      <li key={item} className="text-sm text-[#111]">{item}</li>
                     ))}
                   </ul>
                 </div>

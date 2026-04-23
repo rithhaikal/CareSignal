@@ -71,9 +71,12 @@ export function ChatPanel({ symptoms, severity, duration, ageGroup, language }: 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  /** Maximum number of messages allowed in a single conversation session */
+  const MAX_MESSAGES = 50;
+
   /** Sends a message and appends the AI response */
   const handleSend = async (text: string) => {
-    if (!text.trim() || isLoading) return;
+    if (!text.trim() || isLoading || messages.length >= MAX_MESSAGES) return;
 
     const userMessage: ChatMessage = { role: 'user', content: text.trim() };
     const updatedMessages = [...messages, userMessage];

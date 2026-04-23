@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Landing page — the first screen users see.
  * Introduces CareSignal with a hero section and a 3-step overview.
  */

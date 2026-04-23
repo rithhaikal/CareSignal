@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared navigation header displayed across all screens.
  * Contains the CareSignal logo, language toggle button, and event branding.
  * Extracted to eliminate header duplication across 5 different screens.
