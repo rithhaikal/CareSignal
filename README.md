@@ -21,39 +21,32 @@ It combines rule based risk logic with AI generated guidance to provide clear an
 
 ## 🚀 Features
 
-<<<<<<< HEAD
 - Select symptoms from a predefined list
 - Add custom symptoms manually
 - Instant risk assessment (Safe, Clinic, Emergency)
-- AI-generated guidance for next 24 hours
+- AI generated guidance for next 24 hours
 - Warning signs and escalation triggers
-- English 🇬🇧 / Bahasa Malaysia 🇲🇾 support
+- Follow up chat for contextual questions after assessment
+- English 🇬🇧 and Bahasa Malaysia 🇲🇾 support
 - Find nearby clinics or hospitals via Google Maps
-=======
-- Select symptoms from a predefined list  
-- Add custom symptoms manually  
-- Instant risk assessment (Safe, Clinic, Emergency)  
-- AI generated guidance for next 24 hours  
-- Warning signs and escalation triggers  
-- English 🇬🇧 and Bahasa Malaysia 🇲🇾 support  
-- Find nearby clinics or hospitals via Google Maps  
->>>>>>> 2811bf93e92463623967c570288e7a4f76479aaf
 
 ---
 
 ## ⚡ How It Works
 
-<<<<<<< HEAD
 1. **Symptom Input**
    Users select predefined symptoms or add their own
 
 2. **Risk Evaluation**
-   A rule-based system determines severity instantly
+   A rule based system determines severity instantly
 
 3. **AI Guidance**
    Gemini generates structured next steps, timelines, and warning signs
 
-4. **Language Toggle**
+4. **Follow Up Chat**
+   Users can ask contextual follow up questions about their assessment
+
+5. **Language Toggle**
    Users can switch between English and Bahasa Malaysia
 
 ---
@@ -70,14 +63,17 @@ It combines rule based risk logic with AI generated guidance to provide clear an
 │                                               │
 │  Rule-based severity:  calculateSeverity()    │
 │  AI guidance:          generateGuidance()     │
+│  Follow-up chat:       sendChatMessage()      │
 └──────────────────┬───────────────────────────┘
                    │ POST /api/gemini
+                   │ POST /api/gemini/chat
                    ▼
 ┌──────────────────────────────────────────────┐
 │                  Server                       │
 │  Express.js (Node.js)                         │
 │                                               │
 │  • Proxies Gemini API (key stays server-side) │
+│  • Multi-turn chat with assessment context    │
 │  • Retry logic with exponential backoff       │
 │  • Input validation & rate limiting           │
 │  • Security headers via Helmet                │
@@ -91,25 +87,11 @@ It combines rule based risk logic with AI generated guidance to provide clear an
 │  Structured JSON response (no diagnosis)      │
 └──────────────────────────────────────────────┘
 ```
-=======
-1. Symptom Input  
-   Users select predefined symptoms or add their own  
-
-2. Risk Evaluation  
-   A rule based system determines severity instantly  
-
-3. AI Guidance  
-   Gemini generates structured next steps, timelines, and warning signs  
-
-4. Language Toggle  
-   Users can switch between English and Bahasa Malaysia  
->>>>>>> 2811bf93e92463623967c570288e7a4f76479aaf
 
 ---
 
 ## 🧠 Tech Stack
 
-<<<<<<< HEAD
 | Layer | Technology |
 |---|---|
 | Frontend | React 19 + TypeScript |
@@ -135,6 +117,7 @@ caresignal/
 │   │   ├── App.tsx            # Root component + screen navigation
 │   │   ├── components/
 │   │   │   ├── Header.tsx     # Shared navigation header
+│   │   │   ├── ChatPanel.tsx  # Follow-up conversation panel
 │   │   │   ├── LandingPage.tsx
 │   │   │   ├── SymptomScreen.tsx
 │   │   │   ├── AdditionalInfoScreen.tsx
@@ -153,34 +136,33 @@ caresignal/
 ├── docs/                      # Screenshots for README
 └── public/                    # Static assets (favicon, hero image)
 ```
-=======
-- Frontend React with TypeScript  
-- Styling Tailwind CSS  
-- AI Google Gemini API  
-- State Management React Hooks  
->>>>>>> 2811bf93e92463623967c570288e7a4f76479aaf
 
 ---
 
 ## 💡 Key Design Decisions
 
-<<<<<<< HEAD
 - **Instant results first**
   Users see severity immediately without waiting for AI
 
 - **AI as enhancement, not dependency**
-  Core experience works even if AI fails (static fallback guidance)
+  The core system works even if AI fails or is unavailable
 
-- **Mobile-first UX**
-  Sticky CTA and non-blocking flows
+- **Multi-turn conversation**
+  Users can ask follow up questions with full assessment context
 
-- **Cost-aware AI usage**
-  Responses are cached and reused across language toggles
+- **Mobile first UX**
+  Designed to reduce scrolling friction with sticky actions
 
-- **Server-side API proxy**
+- **Cost aware AI usage**
+  AI responses are reused across language toggles to reduce API calls
+
+- **Structured output design**
+  AI is constrained to return predictable JSON for reliability
+
+- **Server side API proxy**
   Gemini API key never exposed to the browser
 
-- **Input validation & rate limiting**
+- **Input validation and rate limiting**
   Protects the API endpoint from abuse and malformed requests
 
 ---
@@ -239,21 +221,6 @@ npm start
 docker build -t caresignal .
 docker run -p 8080:8080 -e GEMINI_API_KEY=your_key caresignal
 ```
-=======
-- Instant results first  
-  Users see severity immediately without waiting for AI  
-
-- AI as enhancement not dependency  
-  The core system works even if AI fails or is unavailable  
-
-- Mobile first UX  
-  Designed to reduce scrolling friction with sticky actions  
-
-- Cost aware AI usage  
-  AI responses are reused across language toggles to reduce API calls  
-
-- Structured output design  
-  AI is constrained to return predictable JSON for reliability  
 
 ---
 
@@ -262,14 +229,13 @@ docker run -p 8080:8080 -e GEMINI_API_KEY=your_key caresignal
 This project uses AI assisted tools during development including ChatGPT and Google Gemini.
 
 AI was used to:
-- Assist with UI implementation and iteration  
-- Help structure and refine prompt design  
-- Generate contextual guidance based on symptoms  
+- Assist with UI implementation and iteration
+- Help structure and refine prompt design
+- Generate contextual guidance based on symptoms
 
 The core system design including risk classification logic, UX flow, and decision structure was built manually.
 
 All AI generated outputs are constrained, validated, and integrated into a controlled system. The team understands and can explain all parts of the codebase and architecture.
->>>>>>> 2811bf93e92463623967c570288e7a4f76479aaf
 
 ---
 

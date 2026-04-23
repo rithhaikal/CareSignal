@@ -7,7 +7,7 @@
  * basic next-step advice even when the AI service is unavailable.
  */
 
-import type { Language, GuidanceRequest, GuidanceResponse } from '../types';
+import type { Language, GuidanceRequest, GuidanceResponse, ChatMessage, ChatContext } from '../types';
 
 // ---------------------------------------------------------------------------
 // Fallback Guidance
@@ -129,5 +129,46 @@ export async function generateGuidance(request: GuidanceRequest): Promise<Guidan
   } catch (error) {
     console.error('Network error:', error);
     return fallback;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Chat Client (Follow-up Conversation)
+// ---------------------------------------------------------------------------
+
+/**
+ * Sends a follow-up chat message to the backend and returns the AI reply.
+ * Maintains conversation context (symptoms, severity) across multiple turns.
+ *
+ * @param messages - Full conversation history so far
+ * @param context  - Assessment context (symptoms, severity, duration, etc.)
+ * @returns AI reply text, or a fallback message on error
+ */
+export async function sendChatMessage(
+  messages: ChatMessage[],
+  context: ChatContext
+): Promise<string> {
+  const fallbackMessage =
+    context.language === 'bm'
+      ? 'Maaf, saya tidak dapat menjawab sekarang. Sila cuba lagi.'
+      : 'Sorry, I cannot respond right now. Please try again.';
+
+  try {
+    const response = await fetch('/api/gemini/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, context }),
+    });
+
+    if (!response.ok) {
+      console.error('Chat API error:', response.status);
+      return fallbackMessage;
+    }
+
+    const data = await response.json();
+    return data.reply;
+  } catch (error) {
+    console.error('Chat network error:', error);
+    return fallbackMessage;
   }
 }

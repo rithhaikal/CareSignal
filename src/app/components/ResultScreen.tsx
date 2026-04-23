@@ -10,6 +10,7 @@
 
 import { useState } from 'react';
 import { Header } from './Header';
+import { ChatPanel } from './ChatPanel';
 import { RESULTS } from '../data/resultData';
 import type { Language, Severity, GuidanceResponse, WaitRiskItem } from '../../types';
 
@@ -28,11 +29,18 @@ interface ResultScreenProps {
   language: Language;
   /** Callback to switch between EN and BM */
   onToggleLanguage: () => void;
+  /** User's selected symptoms (for chat context) */
+  symptoms: string[];
+  /** How long symptoms have lasted (for chat context) */
+  duration: string;
+  /** User's age group (for chat context) */
+  ageGroup: string;
 }
 
 export function ResultScreen({
   severity, guidance, isTranslating, onRestart,
   onFindCare, language, onToggleLanguage,
+  symptoms, duration, ageGroup,
 }: ResultScreenProps) {
   const result = RESULTS[severity];
 
@@ -265,6 +273,15 @@ export function ResultScreen({
           </div>
         </div>
       </div>
+
+      {/* Follow-up chat panel */}
+      <ChatPanel
+        symptoms={symptoms}
+        severity={severity}
+        duration={duration}
+        ageGroup={ageGroup}
+        language={language}
+      />
     </div>
   );
 }

@@ -88,3 +88,22 @@ export interface ResultConfig {
     bm: WaitRiskItem[];
   };
 }
+
+// ---------------------------------------------------------------------------
+// Chat Types (Follow-up Conversation)
+// ---------------------------------------------------------------------------
+
+/** Single message in the follow-up chat conversation */
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+/** Context passed to the chat API for follow-up conversations */
+export interface ChatContext {
+  symptoms: string[];
+  severity: string;
+  duration: string;
+  ageGroup: string;
+  language: string;
+}

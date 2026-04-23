@@ -304,6 +304,9 @@ export default function App() {
           onFindCare={handleFindCare}
           language={language}
           onToggleLanguage={toggleLanguage}
+          symptoms={symptoms}
+          duration={duration}
+          ageGroup={ageGroup}
         />
       )}
     </div>

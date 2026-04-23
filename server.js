@@ -185,6 +185,87 @@ ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly for
 });
 
 // ---------------------------------------------------------------------------
+// Chat API (Multi-turn Follow-up Conversation)
+// ---------------------------------------------------------------------------
+
+/**
+ * POST /api/gemini/chat
+ * Handles multi-turn follow-up conversations after an assessment.
+ * Receives the full conversation history and assessment context,
+ * enabling Gemini to provide contextual, personalized responses.
+ */
+app.post("/api/gemini/chat", async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: "API key not configured" });
+  }
+
+  // Input validation
+  const { messages, context } = req.body;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: "messages must be a non-empty array" });
+  }
+  if (!context || !Array.isArray(context.symptoms) || !context.severity) {
+    return res
+      .status(400)
+      .json({ error: "context with symptoms and severity is required" });
+  }
+
+  const language = context.language || "en";
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-flash-lite-latest",
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 300,
+      },
+    });
+
+    // Build conversation history string for the prompt
+    const conversationHistory = messages
+      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
+      .join("\n");
+
+    const prompt = `You are CareSignal, a healthcare guidance assistant. You are having a follow-up conversation with a user who just completed a symptom assessment.
+
+Assessment context:
+- Symptoms: ${context.symptoms.join(", ")}
+- Severity level: ${context.severity}
+- Duration: ${context.duration || "Not specified"}
+- Age group: ${context.ageGroup || "Not specified"}
+
+Rules:
+- Do NOT diagnose any condition or disease
+- Do NOT prescribe specific medication or dosages
+- Be helpful, calm, and practical
+- Keep responses concise (2-4 sentences max)
+- If asked about medication, advise consulting a pharmacist or doctor
+- Focus on practical self-care and general wellness advice
+- Respond in ${language === "bm" ? "Bahasa Malaysia (natural, simple)" : "English"}
+${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly formal language" : ""}
+
+Conversation:
+${conversationHistory}
+
+Respond to the user's latest message naturally and helpfully.`;
+
+    // Single attempt (chat is lower priority than assessment)
+    const result = await model.generateContent(prompt);
+    const reply = result.response.text().trim();
+
+    return res.json({ reply });
+  } catch (error) {
+    console.error("Chat API error:", error);
+    return res.status(502).json({ error: "AI service temporarily unavailable" });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // SPA Fallback
 // ---------------------------------------------------------------------------
 
