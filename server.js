@@ -1,9 +1,21 @@
+/**
+ * Express backend server for CareSignal.
+ *
+ * Responsibilities:
+ * - Proxies Gemini API calls to keep the API key server-side
+ * - Validates incoming request payloads
+ * - Applies rate limiting and security headers
+ * - Serves the production React build and handles SPA routing
+ */
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,13 +23,45 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors());
+// ---------------------------------------------------------------------------
+// Middleware
+// ---------------------------------------------------------------------------
+
+/** Security headers (XSS protection, content-type sniffing, etc.) */
+app.use(helmet({ contentSecurityPolicy: false }));
+
+/** CORS — restrict origins in production via ALLOWED_ORIGINS env var */
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(",")
+      : "*",
+  })
+);
+
 app.use(express.json());
 
-// Serve the built React app
+/** Rate limiting — 30 requests per 15 minutes per IP on API routes */
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { error: "Too many requests, please try again later" },
+});
+app.use("/api/", apiLimiter);
+
+/** Serve the built React app */
 app.use(express.static(path.join(__dirname, "dist")));
 
-// Gemini API endpoint
+// ---------------------------------------------------------------------------
+// API Routes
+// ---------------------------------------------------------------------------
+
+/**
+ * POST /api/gemini
+ * Accepts symptom data, generates AI guidance via Gemini, and returns
+ * structured JSON. Includes input validation and retry logic with
+ * exponential backoff for transient API errors.
+ */
 app.post("/api/gemini", async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -25,17 +69,38 @@ app.post("/api/gemini", async (req, res) => {
     return res.status(500).json({ error: "API key not configured" });
   }
 
-  try {
-    const {
-      selectedSymptoms,
-      duration,
-      ageGroup,
-      risk,
-      action,
-      otherSymptom,
-      language = "en",
-    } = req.body;
+  // -----------------------------------------------------------------------
+  // Input validation
+  // -----------------------------------------------------------------------
+  const {
+    selectedSymptoms,
+    duration,
+    ageGroup,
+    risk,
+    action,
+    otherSymptom,
+    language = "en",
+  } = req.body;
 
+  if (!Array.isArray(selectedSymptoms) || selectedSymptoms.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "selectedSymptoms must be a non-empty array" });
+  }
+  if (typeof duration !== "string" || !duration.trim()) {
+    return res.status(400).json({ error: "duration is required" });
+  }
+  if (typeof ageGroup !== "string" || !ageGroup.trim()) {
+    return res.status(400).json({ error: "ageGroup is required" });
+  }
+  if (!["en", "bm"].includes(language)) {
+    return res.status(400).json({ error: "language must be 'en' or 'bm'" });
+  }
+
+  // -----------------------------------------------------------------------
+  // Gemini API call
+  // -----------------------------------------------------------------------
+  try {
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const model = genAI.getGenerativeModel({
@@ -83,7 +148,7 @@ Rules:
 ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly formal government-style language" : ""}
 `;
 
-    // Retry logic with exponential backoff
+    // Retry logic with exponential backoff for transient API errors
     let lastError;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
@@ -119,10 +184,18 @@ ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly for
   }
 });
 
-// Catch-all: serve React app for any other route
+// ---------------------------------------------------------------------------
+// SPA Fallback
+// ---------------------------------------------------------------------------
+
+/** Catch-all: serve React app for any non-API route (SPA client-side routing) */
 app.get("/{*splat}", (_req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
+
+// ---------------------------------------------------------------------------
+// Start Server
+// ---------------------------------------------------------------------------
 
 app.listen(PORT, () => {
   console.log(`CareSignal server running on port ${PORT}`);

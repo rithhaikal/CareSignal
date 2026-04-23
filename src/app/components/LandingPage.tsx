@@ -1,6 +1,14 @@
+/**
+ * Landing page — the first screen users see.
+ * Introduces CareSignal with a hero section and a 3-step overview.
+ */
+
+import { Header } from './Header';
+import type { Language } from '../../types';
+
 interface LandingPageProps {
   onCheckNow: () => void;
-  language: 'en' | 'bm';
+  language: Language;
   onToggleLanguage: () => void;
 }
 
@@ -48,38 +56,21 @@ export function LandingPage({ onCheckNow, language, onToggleLanguage }: LandingP
 
   return (
     <div className="relative bg-gradient-to-br from-[#EAF7EF] via-white to-white overflow-hidden font-sans">
+      {/* Header */}
       <div className="pt-6 px-6 max-w-7xl mx-auto relative z-10">
-        <header className="flex justify-between items-center px-6 py-4 bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="text-xl font-bold text-[#111]">
-            <span className="text-[#2D8A3E]">Care</span>Signal
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onToggleLanguage}
-              className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-semibold text-[#111] hover:border-[#111] transition-colors"
-            >
-              {language === 'en' ? 'BM' : 'EN'}
-            </button>
-
-            <span className="text-sm font-semibold text-gray-700">
-              Build with AI 2026
-            </span>
-          </div>
-        </header>
+        <Header language={language} onToggleLanguage={onToggleLanguage} />
       </div>
 
+      {/* Hero Section */}
       <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-32 md:pt-32 md:pb-40 z-10">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div className="max-w-xl">
             <h1 className="text-5xl md:text-[64px] font-extrabold text-[#0B1A24] tracking-tight leading-[1.05] mb-6">
               {t.title}
             </h1>
-
             <p className="text-xl text-gray-600 leading-relaxed mb-10 font-medium">
               {t.description}
             </p>
-
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <button
                 onClick={onCheckNow}
@@ -89,7 +80,6 @@ export function LandingPage({ onCheckNow, language, onToggleLanguage }: LandingP
               </button>
             </div>
           </div>
-
           <div className="relative flex justify-end">
             <img
               src="/hero.png"
@@ -100,6 +90,7 @@ export function LandingPage({ onCheckNow, language, onToggleLanguage }: LandingP
         </div>
       </div>
 
+      {/* 3-step overview */}
       <div className="bg-white border-t border-[#E5E7EB] relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-24 md:py-32">
           <div className="max-w-3xl mx-auto text-center mb-20">
@@ -110,43 +101,20 @@ export function LandingPage({ onCheckNow, language, onToggleLanguage }: LandingP
               {t.sectionDesc}
             </p>
           </div>
-
           <div className="grid md:grid-cols-3 gap-12">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-[#F0FDF4] text-[#2D8A3E] rounded-full flex items-center justify-center text-xl font-bold mb-6 border border-[#bbf7d0]">
-                1
+            {[
+              { num: 1, title: t.card1Title, desc: t.card1Desc },
+              { num: 2, title: t.card2Title, desc: t.card2Desc },
+              { num: 3, title: t.card3Title, desc: t.card3Desc },
+            ].map((card) => (
+              <div key={card.num} className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#F0FDF4] text-[#2D8A3E] rounded-full flex items-center justify-center text-xl font-bold mb-6 border border-[#bbf7d0]">
+                  {card.num}
+                </div>
+                <h3 className="text-xl font-bold text-[#0B1A24] mb-3">{card.title}</h3>
+                <p className="text-base text-gray-600 leading-relaxed">{card.desc}</p>
               </div>
-              <h3 className="text-xl font-bold text-[#0B1A24] mb-3">
-                {t.card1Title}
-              </h3>
-              <p className="text-base text-gray-600 leading-relaxed">
-                {t.card1Desc}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-[#F0FDF4] text-[#2D8A3E] rounded-full flex items-center justify-center text-xl font-bold mb-6 border border-[#bbf7d0]">
-                2
-              </div>
-              <h3 className="text-xl font-bold text-[#0B1A24] mb-3">
-                {t.card2Title}
-              </h3>
-              <p className="text-base text-gray-600 leading-relaxed">
-                {t.card2Desc}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-[#F0FDF4] text-[#2D8A3E] rounded-full flex items-center justify-center text-xl font-bold mb-6 border border-[#bbf7d0]">
-                3
-              </div>
-              <h3 className="text-xl font-bold text-[#0B1A24] mb-3">
-                {t.card3Title}
-              </h3>
-              <p className="text-base text-gray-600 leading-relaxed">
-                {t.card3Desc}
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </div>

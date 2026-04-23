@@ -1,15 +1,24 @@
+/**
+ * Root application component for CareSignal.
+ * Manages screen navigation, symptom state, severity calculation,
+ * and AI guidance generation across the full user flow.
+ *
+ * Flow: Landing → Symptoms → AdditionalInfo → Loading → Result
+ */
+
 import { useState } from 'react';
+import { Header } from './components/Header';
 import { LandingPage } from './components/LandingPage';
 import { SymptomScreen } from './components/SymptomScreen';
 import { AdditionalInfoScreen } from './components/AdditionalInfoScreen';
 import { ResultScreen } from './components/ResultScreen';
 import { generateGuidance } from '../utils/gemini';
-
-type Screen = 'landing' | 'symptoms' | 'info' | 'loading' | 'result';
-type Severity = 'safe' | 'clinic' | 'emergency';
-type Language = 'en' | 'bm';
+import type { Screen, Severity, Language, GuidanceResponse } from '../types';
 
 export default function App() {
+  // -------------------------------------------------------------------------
+  // State
+  // -------------------------------------------------------------------------
   const [screen, setScreen] = useState<Screen>('landing');
   const [language, setLanguage] = useState<Language>('en');
   const [symptoms, setSymptoms] = useState<string[]>([]);
@@ -18,11 +27,19 @@ export default function App() {
   const [ageGroup, setAgeGroup] = useState('');
   const [severity, setSeverity] = useState<Severity>('safe');
   const [isTranslating, setIsTranslating] = useState(false);
-  const [guidanceByLang, setGuidanceByLang] = useState<{ en: any; bm: any }>({
+
+  /** Cached AI guidance per language to avoid redundant API calls on toggle */
+  const [guidanceByLang, setGuidanceByLang] = useState<{
+    en: GuidanceResponse | null;
+    bm: GuidanceResponse | null;
+  }>({
     en: null,
     bm: null,
   });
 
+  // -------------------------------------------------------------------------
+  // Localized loading screen text
+  // -------------------------------------------------------------------------
   const text = {
     en: {
       processing: 'Processing',
@@ -38,6 +55,11 @@ export default function App() {
 
   const t = text[language];
 
+  // -------------------------------------------------------------------------
+  // Helpers
+  // -------------------------------------------------------------------------
+
+  /** Returns the recommended action text based on severity and language */
   const getActionText = (currentSeverity: Severity, currentLanguage: Language) => {
     if (currentSeverity === 'clinic') {
       return currentLanguage === 'bm'
@@ -54,6 +76,12 @@ export default function App() {
     return currentLanguage === 'bm' ? 'Pantau di rumah' : 'Monitor at home';
   };
 
+  /**
+   * Determines risk severity based on symptom combination, duration, and age.
+   * Critical symptoms (Chest Pain, Breathing Difficulty, Confusion) → emergency.
+   * 3+ symptoms, prolonged duration, or elderly age group → clinic.
+   * Otherwise → safe to monitor at home.
+   */
   const calculateSeverity = (
     selectedSymptoms: string[],
     selectedDuration: string,
@@ -77,6 +105,11 @@ export default function App() {
     return 'safe';
   };
 
+  // -------------------------------------------------------------------------
+  // AI Guidance
+  // -------------------------------------------------------------------------
+
+  /** Generates and caches AI guidance for a specific language */
   const generateAndStoreGuidance = async (
     targetLanguage: Language,
     currentSeverity: Severity,
@@ -103,10 +136,16 @@ export default function App() {
     }));
   };
 
+  // -------------------------------------------------------------------------
+  // Event Handlers
+  // -------------------------------------------------------------------------
+
+  /** Toggles language and fetches AI guidance for the new language if needed */
   const toggleLanguage = async () => {
     const newLanguage: Language = language === 'en' ? 'bm' : 'en';
     setLanguage(newLanguage);
 
+    // Fetch guidance in the new language if on result screen and not yet cached
     if (
       screen === 'result' &&
       !guidanceByLang[newLanguage] &&
@@ -129,16 +168,19 @@ export default function App() {
     }
   };
 
+  /** Navigates from landing to symptom selection */
   const handleCheckNow = () => {
     setScreen('symptoms');
   };
 
+  /** Stores selected symptoms and advances to additional info */
   const handleSymptomNext = (selectedSymptoms: string[], other: string) => {
     setSymptoms(selectedSymptoms);
     setOtherSymptom(other);
     setScreen('info');
   };
 
+  /** Runs severity calculation, fetches AI guidance, and shows result */
   const handleCheck = async (selectedDuration: string, selectedAgeGroup: string) => {
     setDuration(selectedDuration);
     setAgeGroup(selectedAgeGroup);
@@ -165,10 +207,12 @@ export default function App() {
     setScreen('result');
   };
 
+  /** Returns to symptom selection screen */
   const handleBackToSymptoms = () => {
     setScreen('symptoms');
   };
 
+  /** Resets all state and returns to landing page */
   const handleRestart = () => {
     setSymptoms([]);
     setOtherSymptom('');
@@ -180,6 +224,7 @@ export default function App() {
     setScreen('landing');
   };
 
+  /** Opens Google Maps to find nearby clinics or hospitals based on severity */
   const handleFindCare = () => {
     let query = language === 'bm' ? 'klinik berdekatan' : 'clinic near me';
 
@@ -192,6 +237,10 @@ export default function App() {
     const url = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
     window.open(url, '_blank');
   };
+
+  // -------------------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------------------
 
   return (
     <div className="min-h-screen w-full">
@@ -221,27 +270,11 @@ export default function App() {
         />
       )}
 
+      {/* Loading screen — shown while AI guidance is being generated */}
       {screen === 'loading' && (
         <div className="min-h-screen bg-gradient-to-br from-[#EAF7EF] via-white to-white font-sans">
           <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
-            <div className="mb-12 flex items-center justify-between rounded-xl border border-gray-100 bg-white px-6 py-4 shadow-sm">
-              <div className="text-xl font-bold text-[#111]">
-                <span className="text-[#2D8A3E]">Care</span>Signal
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={toggleLanguage}
-                  className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-semibold text-[#111] hover:border-[#111]"
-                >
-                  {language === 'en' ? 'BM' : 'EN'}
-                </button>
-
-                <span className="text-sm font-semibold text-gray-700">
-                  Build with AI 2026
-                </span>
-              </div>
-            </div>
+            <Header language={language} onToggleLanguage={toggleLanguage} className="mb-12" />
 
             <div className="max-w-3xl mx-auto flex flex-col items-center justify-center text-center py-24">
               <div className="w-14 h-14 border-4 border-[#D1D5DB] border-t-[#0B1A24] rounded-full animate-spin mb-8"></div>
