@@ -176,7 +176,7 @@ ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly for
 `;
 
     // Retry logic with fallback models for transient API errors
-    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-flash"];
     let lastError;
     
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -292,7 +292,7 @@ ${conversationHistory}
     Respond to the user's latest message naturally and helpfully.`;
 
     // Retry logic with fallback models for transient API errors
-    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-flash"];
     let lastError;
 
     for (let attempt = 0; attempt < 3; attempt++) {

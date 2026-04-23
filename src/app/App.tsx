@@ -106,14 +106,16 @@ export default function App() {
 
     const totalSymptomCount = selectedSymptoms.length + (lowerOther.length > 0 ? 1 : 0);
 
-    if (hasCritical || hasEmergencyOther || (totalSymptomCount >= 5 && selectedDuration === 'More than 2 days')) {
+    const isLongDuration = selectedDuration === 'More than 2 days' || selectedDuration === 'Lebih dari 2 hari';
+
+    if (hasCritical || hasEmergencyOther || (totalSymptomCount >= 5 && isLongDuration)) {
       return 'emergency';
     }
 
     if (
       hasClinicOther ||
       totalSymptomCount >= 3 ||
-      selectedDuration === 'More than 2 days' ||
+      isLongDuration ||
       selectedAgeGroup.includes('65+')
     ) {
       return 'clinic';
