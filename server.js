@@ -120,7 +120,7 @@ ${language === "bm" ? "- Use natural, simple Malaysian Malay\n- Avoid overly for
 });
 
 // Catch-all: serve React app for any other route
-app.get("*", (_req, res) => {
+app.get("/{*splat}", (_req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
