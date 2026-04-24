@@ -175,7 +175,8 @@ EXPLANATION RULES (you MUST follow these strictly):
 Additional rules:
 - The severity field MUST be exactly one of: "safe", "clinic", "emergency"
 - Do not diagnose or name specific diseases unless absolutely necessary
-- The next24h actions MUST be specific to the reported symptoms (not generic tips like "drink water")
+- If the user provides non-medical or random text (e.g., "hello", "pizza", "asdf"), ignore it. If there are NO valid medical symptoms, classify as "safe" and gently explain that you didn't recognize any medical symptoms. For the arrays (next24h, warningSigns, ifYouWait), provide generic advice to "Please provide valid medical symptoms if you are feeling unwell" or "Monitor for any actual symptoms."
+- The next24h actions MUST be specific to the reported symptoms (not generic tips like "drink water" unless no symptoms were provided)
 - The warningSigns MUST describe how the reported symptoms could escalate
 - Avoid generic filler and clinical jargon
 - Focus on next steps, not medical certainty
