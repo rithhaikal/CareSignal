@@ -159,5 +159,5 @@ docker run -p 8080:8080 -e GEMINI_API_KEY=your_key caresignal
 ## ⚠️ Disclaimer & Limitations
 
 - **Not a medical diagnosis tool.** This application is for informational purposes only and does not replace professional medical advice. Always consult a qualified healthcare provider for medical concerns.
-- Uses predefined logic for severity classification, while AI responses provide supplementary guidance.
+- AI acts as the primary triage engine for severity classification, with local predefined logic serving as a robust safety fallback if the AI is unavailable.
 - AI assisted tools (ChatGPT & Gemini) were used during development for UI iteration and prompt design, but core logic was built manually.
