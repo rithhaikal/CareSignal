@@ -6,6 +6,12 @@ It uses an AI-driven triage engine, backed by local risk logic, to provide clear
 
 ---
 
+## 🌐 Live Demo
+
+👉 https://caresignal-985759446862.asia-southeast1.run.app/
+
+---
+
 ## 📸 Screenshots
 
 | Landing Page | Symptom Selection | Result Screen |
